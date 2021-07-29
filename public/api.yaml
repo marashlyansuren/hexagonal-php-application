@@ -1,0 +1,480 @@
+openapi: 3.0.0
+info:
+  title: Hexagonal PHP Application
+  description: Hexagonal PHP Application api provides detailed description about how to interact with Hexagonal PHP Application service
+  version: 0.0.1
+servers:
+  - url: http://localhost
+    description: Local
+
+paths:
+  /oauth:
+    post:
+      summary: oAuth endpoint to retrive access token
+      tags:
+        - oAuth
+      parameters:
+        - $ref: '#/components/parameters/ContentType'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  description: User password
+                  example: "12345678"
+      responses:
+        '200':
+          description: A JSON object of oauth token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessTokenRefreshToken'
+              examples:
+                Token:
+                  $ref: '#/components/examples/AccessTokenRefreshToken'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    description: http status codes
+                  message:
+                    type: string
+                    description: Http response message
+              examples:
+                InvalidCredentials:
+                  value:
+                    "code": 401,
+                    "message": "Invalid credentials."
+
+  /users:
+    post:
+      summary: Register a user
+      description: Register new user
+      tags:
+        - User
+      parameters:
+        - $ref: '#/components/parameters/ContentType'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User email whcih will be used as username for login later
+                  example: marashlyan.suren@gmail.com
+                full_name:
+                  type: string
+                  maxLength: 100
+                  minLength: 3
+                  description: User full name
+                  example: Suren Marashlyan
+                display_name:
+                  type: string
+                  maxLength: 100
+                  minLength: 3
+                  description: User display name
+                  nullable: true
+                  example: S. Marashlyan
+                password:
+                  type: string
+                  maxLength: 50
+                  minLength: 8
+                  description: User password, which will be used for login
+                  example: "12345678"
+              required:
+                - email
+                - full_name
+                - password
+      responses:
+        '201':
+          description: A JSON object of new registated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                User:
+                  $ref: '#/components/examples/UserExample'
+  /users/me:
+    get:
+      summary: Get logged in user
+      description: Get current logged in user
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ContentType'
+      responses:
+        '200':
+          description: A JSON object of new a user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                User:
+                  $ref: '#/components/examples/UserExample'
+        '401':
+          $ref: '#/components/responses/401'
+    delete:
+      summary: Delete user
+      description: Delete current user
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ContentType'
+      responses:
+        '200':
+          description: A JSON object of new a user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                User:
+                  $ref: '#/components/examples/UserExample'
+        '401':
+          $ref: '#/components/responses/401'
+
+  /forgot-password-attempts:
+    post:
+      summary: Request to forgor password
+      description: Request to forgor password, which will send email, and prepare evrithing for forget password flow
+      tags:
+        - User Forgot Passsword
+      parameters:
+        - $ref: '#/components/parameters/ContentType'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User email/username who request for password revovery
+                  example: marashlyan.suren@gmail.com
+      responses:
+        '201':
+          description: A JSON object of new user verification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForgetPasswordAttempt'
+              examples:
+                User:
+                  $ref: '#/components/examples/ForgetPasswordAttemptExample'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/404'
+              examples:
+                404UserNotFoundByEmail:
+                  $ref: '#/components/examples/404UserNotFoundByEmail'
+  /forgot-password-attempts/{token}:
+    put:
+      summary: Reset password
+      description: Reset password, needs to called after getting email token
+      tags:
+        - User Forgot Passsword
+      parameters:
+        - $ref: '#/components/parameters/ContentType'
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+            description: User forget password token, comming from email
+            example: JGFyZ29uMmlkJHY9MTkkbT02NTUzNix0PTQscD0xJFlVSmlMelp5VDBKRmExWlpibFpNTUEkRGR2blpiNHQvTDVzQS90SDErVkloWHFVYWZhOUpqV1R4NUdsaWkzSUk4SQ==
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  maxLength: 50
+                  minLength: 8
+                  description: User password, which will be used for login
+                  example: cD0xJFlVSmlMelp5VDBKRmExWlpibFp
+      responses:
+        '200':
+          description: A JSON object of confirmed user verification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForgetPasswordAttempt'
+              examples:
+                User:
+                  $ref: '#/components/examples/ForgetPasswordAttemptConfirmedExample'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/400'
+              examples:
+                400UserVerificationAndUserIdNotFound:
+                  $ref: '#/components/examples/400UserVerificationAndUserIdNotFound'
+        '401':
+          $ref: '#/components/responses/401'
+
+  /users/me/verifications:
+    post:
+      summary: Start user verification
+      description: Start user verification, which will send email, and prepare evrithing for verification
+      tags:
+        - User Verification
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ContentType'
+      responses:
+        '201':
+          description: A JSON object of new user verification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserVerification'
+              examples:
+                User:
+                  $ref: '#/components/examples/UserVerificationExample'
+        '401':
+          $ref: '#/components/responses/401'
+  /users/me/verifications/{token}:
+    put:
+      summary: Confirm user verification
+      description: Confirm user verification, with the email token.
+      tags:
+        - User Verification
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ContentType'
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+            description: User verification token, comming from email
+            example: JGFyZ29uMmlkJHY9MTkkbT02NTUzNix0PTQscD0xJFlVSmlMelp5VDBKRmExWlpibFpNTUEkRGR2blpiNHQvTDVzQS90SDErVkloWHFVYWZhOUpqV1R4NUdsaWkzSUk4SQ==
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [confirmed]
+                  description: Confoirm status to confirm verification
+      responses:
+        '200':
+          description: A JSON object of confirmed user verification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserVerification'
+              examples:
+                User:
+                  $ref: '#/components/examples/UserVerificationConfirmedExample'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/400'
+              examples:
+                400UserVerificationAndUserIdNotFound:
+                  $ref: '#/components/examples/400UserVerificationAndUserIdNotFound'
+        '401':
+          $ref: '#/components/responses/401'
+
+components:
+  parameters:
+    ContentType:
+      name: Content-Type
+      in: header
+      required: true
+      schema:
+        type: string
+        example:
+          application/json
+      description: Content-type
+  schemas:
+    AccessTokenRefreshToken:
+      type: object
+      properties:
+        token:
+          type: string
+          description: oauth token; ttl is 1 hour
+          example: eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2MDk0MjgyMzEsImV4cCI6MTYwOTQzMTgzMSwicm9sZXMiOlsiUk9MRV9VU0VSIl0sInVzZXJuYW1lIjoibWFyYXNobHlhbi5zdXJlbkBnbWFpbC5jb20ifQ.zBQEtvVZnflkD5X2cadCR8pS11sekQEtYfA2amtxLyRrQiB95fK8CMg_JzGaWT7zOCXV3lczzeivaGT1EgrYPHfrF7MaMxiEIoYzUSZEpSvk7F3phmL21H4sWdl-W4n2oxIv2LvTzfS91kCgKXrUI3bJ887pbUirfBsIhEsla8vyf9mcJo08UeOnYq8u0aDeUbQvf4ZJJNJhGSdxMl3xlSvu6ralYNo6leNy2fJb7l_4RtrzWoHJ5PZ7Z6Jazch8DEn6LqNuiEbyQ1fH5Le-gFs8cq7eYdvnjLuv373di_v3EUPgaXps79Xew5YiaNvx9JmPDudI18DXYoFJAwVgyV3Io_XJDqzqBJLnF-9Nf7WndxrI-ViS5CjLQ5x-VivsnOK9D9CZ7HvoPQfbBxy82LzQERwsycKvgi19P-kg7eXFoqGQWLkzuvKxbmnnpMnUhFToqytQ3FDqGjREAUaqTzyoRmvNwkcMqff1cva58p9KhPP2xxhjBYJZw3UdBuiLTFv8Ce-c7jhNQJa9nbBonvPppzTXBPmbLOnTAqUNE67q3tpAGgJkwW_PryFl34c0i5LhOA1RMURFHDF9xHPNzV6tyFmWvQAGSo3KqUXB6eBb6RylrKjOvgNwpLaewPI2bKIET9DiWawI2PHBPzoPyW5cN6smydhUTkZr76Lsmc0
+        refresh_token:
+          type: string
+          description: oauth refresh token; ttl is 1 month
+          example: 814cb53280d89c4029224ecce3a2f0bc34da23b56f2f4d1e20f5793e39bb1ed0c72f4d6a07ba01c6e796972582197ff8bbd54db9295085bdf05ba1b1febcfb4d
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: User identifier
+          example: 651a84eb-1db0-4fc3-a440-2d460672bbd4
+        email:
+          type: string
+          format: email
+          description: User email
+          example: marashlyan.suren@gmail.com
+        full_name:
+          type: string
+          description: User full name
+          example: Suren Marashlyan
+        display_name:
+          type: string
+          description: User display name
+          example: Suren M.
+        birthday:
+          type: string
+          format: date
+          description: Educator birthday
+          example: 1992-02-01
+          nullable: true
+        gender:
+          type: string
+          enum: [male, female, other]
+          description: Educator gender
+          nullable: true
+        verified:
+          type: boolean
+          description: Indicate whether a user account is verified or not (mostly by email).
+        status:
+          type: string
+          enum: ["active", "inactive", "deleted"]
+          description: User status
+          example: active
+        created_at:
+          type: string
+          format: 'date-time'
+          example: 2020-12-31 14:25:45
+        _links:
+          type: object
+          properties:
+            self:
+              type: object
+              properties:
+                href:
+                  type: string
+                  format: uri
+    UserVerification:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [created, confirmed, expired, disabled]
+          description: Verification statuses
+    ForgetPasswordAttempt:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [created, confirmed, expired, disabled]
+          description: Verification statuses
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    401:
+      description: Unauthorized request. Happens when authentication is required and has failed or has not yet been provided
+    403:
+      description: |
+        Forbidden. The request contained valid data and was understood by the server, but the server is refusing action
+        This may be due to the user not having the necessary permissions for a resource or needing an account of some sort  or attempting a prohibited action;
+    400:
+      description: Bad Request. The server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax, size too large, invalid request message framing, or deceptive request routing)
+    404:
+      description: Not Found. The requested resource could not be found but may be available in the future. Subsequent requests by the client are permissible.
+    500:
+      description: Internal Server Error. A generic error message, given when an unexpected condition was encountered and no more specific message is suitable
+  examples:
+    AccessTokenRefreshToken:
+      value:
+        "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2MTA0OTc2MjEsImV4cCI6MTYxMDUwMTIyMSwicm9sZXMiOlsiUk9MRV9VU0VSIl0sInVzZXJuYW1lIjoibWFyYXNobHlhbi5zdXJlbkBnbWFpbC5jb20ifQ.PSq2JO3BMtxukCny3hG6YFv5D8FIkdV0sniba_uo9ARyOLi4sy44qbOVcfNm8B6DV6EwuhasxrtCqtWLr9cWwPl0pIQxZf1RMtVlHmSel8UA5s7e-SGsvNyXrNTj53Tp-wGDltx2jGzRZ5wmG77Zj8VivFYsR48NEkMGLxb5hW3B8QL_Y4jselqaZsaxXkvvvFhHPm-BmbYT03SZ2aXcjlyMjjk7IIEBwNbR7DFpCb7alGqHxm9vNQiHElCNuqTtdiAwFwctHwWHBrO4E9kHhaaxPuQ4PsP33OW2mRYBkJKZZjS3onuPyctshgJpDpQdbnApZH-pM_dSsUqYDfvpFE3I9ZFpTNb-wAs8Xmfwpb6Kki5tLhAJM3LZAvuGQ6RNC_qODrC6t5igOd_4HpKERQWvMJQxzEEZHE1Ua6lIHjvHxWaji9pnbnVICWcRrzCkWehUUYnSv457hsJ8VJNxfZ48qc3HTi2LxiuR8KEfIPmHx71Yrt6374yPNWeIN5H9583EBTvcjlzg7N6flu3prwC18mV5jGlOT8z6vkYwCpatNTso7AAViFwU0lw6YALWrbAPG7ztnSVU6pbC18Bp-VBrj-hdptJ--t_Hswb30RPpwqofbQlOKk1H3G15BXYONh8UW1gKd_Ej6FK6_9JLQ7ywF63dOknvVt9w7u9dHsw"
+        "refresh_token": "814cb53280d89c4029224ecce3a2f0bc34da23b56f2f4d1e20f5793e39bb1ed0c72f4d6a07ba01c6e796972582197ff8bbd54db9295085bdf05ba1b1febcfb4d"
+    UserExample:
+      value:
+        "id": "651a84eb-1db0-4fc3-a440-2d460672bbd4"
+        "email": "marashlyan.suren@gmail.com"
+        "full_name": "Suren Marashlyan"
+        "display_name": "Suren M."
+        "type": "educator"
+        "birthday": "1992-08-09"
+        "gender": "male"
+        "profile_image": "https://staging-imagecrop.popupschool.com/400x400/user/440472fb-aaf1-4fed-9cf5-4569a452ad73.jpeg"
+        "followers": 52
+        "following": 50
+        "verified": false
+        "status": "active"
+        "score": 150
+        "level": "new_member"
+        "created_at": "2020-12-31 14:25:45"
+        "_links": {
+          "self": {
+            "href": "/users/651a84eb-1db0-4fc3-a440-2d460672bbd4",
+          },
+          "verification": {
+            "href": "/users/81f4d4fc-26d2-4f05-9262-4e9498691acd/verifications"
+          }
+        }
+    UserVerificationExample:
+      value:
+        "status": "created"
+    ForgetPasswordAttemptExample:
+      value:
+        "status": "created"
+    UserVerificationConfirmedExample:
+      value:
+        "status": "confirmed"
+    ForgetPasswordAttemptConfirmedExample:
+      value:
+        "status": "confirmed"
+    404UserVerificationNotFound:
+      value:
+        "errors": [
+            "User verification not found by id: 1fac091f-4238-4fb1-bde6-9750fe4da3ab, user id: 9c28b038-7cb8-4f02-81f9-241d58b3534a and status 0"
+        ]
+    404UserNotFoundByEmail:
+      value:
+        "errors": [
+            "No user with such email."
+        ]
+    400UserVerificationAndUserIdNotFound:
+      value:
+        "errors": [
+            "User verification not found by id: 1fac091f-4238-4fb1-bde6-9750fe4da3ab, user id: 9c28b038-7cb8-4f02-81f9-241d58b3534a and status 0"
+        ]

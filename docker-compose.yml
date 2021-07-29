@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  php-app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: local-dev
+    image: hexagonal-php-application-rest-api/php
+    container_name: hexagonal-php-app-container
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+      - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+  webserver:
+    image: nginx:alpine
+    container_name: hexagonal-php-app-webserver-container
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php-app
+      - db
+
+  db:
+    image: mysql:5.7.22
+    container_name: hexagonal-php-app-db-container
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: hexagonal-php-application
+      MYSQL_ROOT_PASSWORD: toxindzners
+    volumes:
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf

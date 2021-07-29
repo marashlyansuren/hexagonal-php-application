@@ -1,0 +1,52 @@
+security:
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        # used to reload user from session & other features (e.g. switch_user)
+        app_user_provider:
+            entity:
+                class: App\User\Domain\User
+                property: email
+    firewalls:
+        login:
+            pattern:  ^/oauth
+            stateless: true
+            anonymous: true
+            user_checker: App\Configuration\UserChecker
+            json_login:
+                check_path:               /oauth
+                success_handler:          lexik_jwt_authentication.handler.authentication_success
+                failure_handler:          lexik_jwt_authentication.handler.authentication_failure
+        users:
+            pattern:   ^/users/
+            stateless: true
+            guard:
+                authenticators:
+                    - lexik_jwt_authentication.jwt_token_authenticator
+        registration:
+            pattern: /users
+            stateless: true
+            anonymous: true
+        forgot_password_attempts:
+            pattern: ^/forgot-password-attempts
+            stateless: true
+            anonymous: true
+        api:
+            pattern:   ^/
+            stateless: true
+            guard:
+                authenticators:
+                    - lexik_jwt_authentication.jwt_token_authenticator
+
+    access_control:
+        - { path: ^/forgot-password-attempts, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/health, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/oauth,  roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/users/, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/users,  roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
+
+    encoders:
+        # this internal class is used by Symfony to represent in-memory users
+        App\User\Domain\User:
+            algorithm: sodium
+

@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<ruleset name="PopupSchool">
+    <description>The coding standard for PopupSchool</description>
+    <rule ref="PSR12">
+    </rule>
+    <rule ref="Generic">
+        <exclude name="Generic.Files.LowercasedFilename.NotFound" />
+        <exclude name="Generic.Files.EndFileNoNewline.Found" />
+        <exclude name="Generic.Files.EndFileNewline.NotFound" />
+
+        <exclude name="Generic.PHP.ClosingPHPTag.NotFound" />
+        <exclude name="Generic.PHP.RequireStrictTypes.MissingDeclaration" />
+        <exclude name="Generic.PHP.UpperCaseConstant.Found" />
+
+        <exclude name="Generic.Commenting.DocComment.MissingShort" />
+        <exclude name="Generic.Commenting.DocComment.ParamNotFirst" />
+
+        <exclude name="Generic.Classes.OpeningBraceSameLine.BraceOnNewLine" />
+
+        <exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.BraceOnNewLine" />
+        <exclude name="Generic.Functions.OpeningFunctionBraceBsdAllman.BraceOnSameLine" />
+
+        <exclude name="Generic.Formatting.NoSpaceAfterCast.SpaceFound" />
+        <exclude name="Generic.Formatting.SpaceBeforeCast.NoSpace" />
+        <exclude name="Generic.Formatting.SpaceAfterNot.Incorrect" />
+
+        <exclude name="Generic.Arrays.DisallowShortArraySyntax.Found" />
+
+        <exclude name="Generic.WhiteSpace.DisallowTabIndent.TabsUsed" />
+
+        <exclude name="PSR2.Files.EndFileNewline.NoneFound" />
+
+        <exclude name="Generic.Metrics.CyclomaticComplexity.MaxExceeded" />
+
+        <exclude name="Generic.Commenting.DocComment.TagsNotGrouped" />
+
+        <exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
+        <exclude name="Generic.Files.ExecutableFile.Executable" />
+    </rule>
+    <rule ref="Squiz.NamingConventions.ValidVariableName">
+        <exclude name="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore" />
+    </rule>
+    <rule ref="Generic.NamingConventions.CamelCapsFunctionName.ScopeNotCamelCaps">
+        <exclude-pattern>/src/Course/Domain/ContentType.php</exclude-pattern>
+    </rule>
+
+    <file>src/</file>
+    <file>tests/</file>
+</ruleset>

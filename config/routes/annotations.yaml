@@ -1,0 +1,15 @@
+controllers:
+    resource: ../../src
+    type: annotation
+
+kernel:
+    resource: ../../src/Kernel.php
+    type: annotation
+
+educators_collection:
+    path: /educators/me/educators
+    controller: App\Educator\Adapter\In\Web\Controller\EducatorController::educators
+
+educators_public_collection:
+    path: /educators
+    controller: App\Educator\Adapter\In\Web\Controller\EducatorPublicController::publicEducators

@@ -1,0 +1,4 @@
+parameters:
+    checkGenericClassInNonGenericObjectType: false
+    excludePaths:
+        - src/*/Adapter/In/Web/Request/*

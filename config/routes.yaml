@@ -1,0 +1,9 @@
+#index:
+#    path: /
+#    controller: App\Controller\DefaultController::index
+oauth:
+  path: /oauth
+
+gesdinet_jwt_refresh_token:
+  path:       /oauth/refresh
+  controller: gesdinet.jwtrefreshtoken::refresh

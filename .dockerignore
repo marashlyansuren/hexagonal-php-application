@@ -1,0 +1,6 @@
+diagrams
+.git*
+.gitignore
+Makefile
+docker-compose*
+.env
